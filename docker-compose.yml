@@ -1,0 +1,19 @@
+services:
+  server:
+    build: server/
+    depends_on:
+      - cache
+  cache:
+    build: cache/
+    depends_on:
+      - db
+  db:
+    image: postgres:alpine3.15
+  nginx:
+    image: nginx
+    depends_on:
+      - server
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    ports:
+      - "80:80"    
