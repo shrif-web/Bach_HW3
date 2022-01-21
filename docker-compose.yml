@@ -22,5 +22,6 @@ services:
       - server
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./front/banana-notes/build:/usr/share/nginx/html
     ports:
       - "80:80"    
