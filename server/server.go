@@ -186,6 +186,7 @@ func (sv server) getNoteHandler(c *gin.Context) {
 
 	c.JSON(200, gin.H{
 		"success": true,
+		"id":      note.Id,
 		"title":   note.Title,
 		"content": note.Content,
 	})
