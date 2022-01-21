@@ -7,10 +7,8 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 
-COPY *.go .
-RUN CGO_ENABLED=0 go build -o cache_server .
-
 COPY . .
+RUN CGO_ENABLED=0 go build -o cache_server .
 
 #
 FROM scratch
@@ -20,4 +18,4 @@ WORKDIR /app
 COPY --from=builder /app/cache_server .
 
 EXPOSE 8090
-CMD ["/app/server"]
+CMD ["/app/cache_server"]

@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package cache;
+option go_package = "./rpc";
+
+message response {
+    string value = 1;
+}
+
+message getRequest {
+    string key = 1;
+}
+
+message putRequest {
+    string key = 1;
+    string value = 2;
+}
+
+service Cache{
+    rpc Get(getRequest) returns (response) {};
+    rpc Put(putRequest) returns (response) {};
+}
