@@ -1,10 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"os"
-
-	"server/cache"
 )
 
 func main() {
@@ -12,11 +9,7 @@ func main() {
 	if addr == "" {
 		addr = "localhost:3124"
 	}
-	fmt.Println("here")
-	client := cache.NewCacheClient(addr)
-	client.Put("asd", "asdd")
-	fmt.Println(client.Get("asdf"))
-	println(client.Get("asd"))
-	client.Put("asdf", "asddff")
-	println(client.Get("asdf"))
+	sv := NewServer()
+
+	sv.Run("3000")
 }

@@ -1,13 +1,13 @@
 services:
   server:
-    build: server/
+    build: ./server
     depends_on:
       - cache
       - db
     environment:
       - CACHE_ADDR=cache:3124
   cache:
-    build: cache/
+    build: ./cache
     depends_on:
       - db
     environment:
@@ -16,6 +16,9 @@ services:
     image: postgres:alpine3.15
     environment:
       - POSTGRES_PASSWORD=password
+
+    ports:
+      - "5432:5432"
   nginx:
     image: nginx
     depends_on:
