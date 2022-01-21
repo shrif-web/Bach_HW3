@@ -1,10 +1,14 @@
+import { Route, Routes } from "react-router-dom";
 
-import './App.css';
-import EntryPage from './pages/EntryPage';
+import "./App.css";
+import EntryPage from "./pages/EntryPage";
 
 function App() {
   return (
-    <EntryPage />
+    <Routes>
+      <Route path="/" element={<EntryPage />} />
+      <Route path="/notes" />
+    </Routes>
   );
 }
 

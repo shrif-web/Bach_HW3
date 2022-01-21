@@ -12,7 +12,7 @@ function EntryPage() {
 
   const onSignInFinish = (values) => {
     console.log("Signing in ...:", values);
-    fetch("/auth", {
+    fetch("/api/auth", {
       method: "POST",
       body: JSON.stringify({
         user: values.username,
@@ -44,7 +44,7 @@ function EntryPage() {
 
   const onSignUpFinish = (values) => {
     console.log("Signing up ...:", values);
-    fetch("/reg", {
+    fetch("/api/reg", {
       method: "POST",
       body: JSON.stringify({
         firstname: values.firstname,
