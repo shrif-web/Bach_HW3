@@ -13,10 +13,10 @@ type server struct {
 	DataHandler
 }
 
-func NewServer() server {
+func NewServer(db_host, db_port, db_password string) server {
 	sv := server{
 		NewJWT(),
-		NewDataHandler(),
+		NewDataHandler(db_host, db_port, db_password),
 	}
 
 	return sv
@@ -26,10 +26,11 @@ func (sv server) Run(port string) {
 
 	r := gin.Default()
 	r.POST("/auth", sv.authHandler)
+	r.POST("/reg", sv.addUserHandler)
 	r.GET("/auth", sv.authGetHandler)
 	r.POST("/add", sv.addNoteHandler)
 	r.GET("/", sv.getHandler)
-	r.GET("/notes/:id", sv.getHandler)
+	r.GET("/notes/:id", sv.getNoteHandler)
 	r.GET("/signout", sv.signoutHandler)
 	r.NoRoute(sv.notFoundHandler)
 
@@ -41,6 +42,25 @@ func (sv server) authHandler(c *gin.Context) {
 	password := c.PostForm("password")
 
 	user, err := sv.UserAuth(username, password)
+
+	if err != nil {
+		c.JSON(403, gin.H{
+			"success": false,
+			"error":   "unauthorized",
+		})
+		return
+	}
+
+	token, _ := sv.GenerateJWT(*user)
+	c.SetCookie("token", token, 3600, "/", "", true, false)
+	c.Redirect(http.StatusFound, "/")
+}
+
+func (sv server) addUserHandler(c *gin.Context) {
+	username := c.PostForm("username")
+	password := c.PostForm("password")
+
+	user, err := sv.UserAdd(username, password)
 
 	if err != nil {
 		c.JSON(403, gin.H{

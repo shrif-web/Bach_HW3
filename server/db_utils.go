@@ -26,9 +26,9 @@ type DataHandler struct {
 	pg *gorm.DB
 }
 
-func NewDataHandler() (db DataHandler) {
+func NewDataHandler(host, port, password string) (db DataHandler) {
 	db.pg, _ = gorm.Open(postgres.New(postgres.Config{
-		DSN:                  "host=localhost user=postgres password=password dbname=postgres port=5432 sslmode=disable",
+		DSN:                  "host=" + host + " user=postgres password=" + password + " dbname=postgres port=" + port + " sslmode=disable",
 		PreferSimpleProtocol: true,
 	}), &gorm.Config{})
 

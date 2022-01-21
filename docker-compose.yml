@@ -6,6 +6,10 @@ services:
       - db
     environment:
       - CACHE_ADDR=cache:3124
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_PASSWORD=password
+
   cache:
     build: ./cache
     depends_on:
