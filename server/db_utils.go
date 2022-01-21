@@ -78,6 +78,24 @@ func (db DataHandler) NoteAdd(oid uint, title, content string) (*Note, error) {
 	return note, res.Error
 }
 
+func (db DataHandler) NoteUpdate(id uint, title, content string) (*Note, error) {
+	note := &Note{
+		Id: id,
+	}
+
+	res := db.pg.First(&note)
+
+	if res.Error != nil {
+		return &Note{}, res.Error
+	}
+
+	note.Title = title
+	note.Content = content
+
+	res = db.pg.Save(&note)
+	return note, res.Error
+}
+
 func (db DataHandler) GetNote(id uint) (*Note, error) {
 
 	note := &Note{
@@ -88,14 +106,14 @@ func (db DataHandler) GetNote(id uint) (*Note, error) {
 	return note, res.Error
 }
 
-func (db DataHandler) GetUserNotes(oid uint) (*Note, error) {
-
+func (db DataHandler) GetUserNotes(oid uint) ([]Note, error) {
+	notes := make([]Note, 10)
 	note := &Note{
 		Owner: oid,
 	}
-	res := db.pg.Where(note).Find(&note)
+	res := db.pg.Where(note).Find(&notes)
 
-	return note, res.Error
+	return notes, res.Error
 }
 
 func getHash(str string) (sha string) {

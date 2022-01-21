@@ -9,6 +9,7 @@ services:
       - DB_HOST=db
       - DB_PORT=5432
       - DB_PASSWORD=password
+      - JWT_KEY=randomstring
 
   cache:
     build: ./cache

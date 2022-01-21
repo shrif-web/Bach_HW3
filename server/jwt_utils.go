@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/rand"
 	"errors"
 	"fmt"
 	"time"
@@ -18,9 +17,8 @@ type JWTHandler struct {
 	signingKey []byte
 }
 
-func NewJWT() JWTHandler {
-	token := make([]byte, 16)
-	rand.Read(token)
+func NewJWT(key string) JWTHandler {
+	token := []byte(key)
 	return JWTHandler{token}
 }
 
