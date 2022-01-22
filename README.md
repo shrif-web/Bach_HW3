@@ -1,10 +1,12 @@
 # HW3
-Just do: 
-```
-docker-compose up
-```
 If you made changes to the front folder make sure to run 
 ```
+cd front/banana-notes
 npm run build
 ```
-in the banana-notes directory for changes to take effect.
+Then just do 
+```
+docker-compose build
+docker-compose up -d --scale server=3
+```
+The `--scale server=3` runs 3 servers to achieve load balancing.
