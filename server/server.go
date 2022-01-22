@@ -45,6 +45,7 @@ func (sv server) Run(port string) {
 	r.GET("/notes/:id", sv.getNoteHandler)
 	r.GET("/notes", sv.getUserNotesHandler)
 	r.GET("/signout", sv.signoutHandler)
+	r.GET("/user", sv.getUserHandler)
 	r.NoRoute(sv.notFoundHandler)
 
 	r.Run(fmt.Sprintf(":" + port))
@@ -66,7 +67,7 @@ func (sv server) authHandler(c *gin.Context) {
 
 	token, _ := sv.GenerateJWT(*user)
 	c.SetCookie("token", token, 3600, "/", "", true, false)
-	c.JSON(403, gin.H{
+	c.JSON(200, gin.H{
 		"success": true,
 	})
 }
@@ -88,7 +89,7 @@ func (sv server) addUserHandler(c *gin.Context) {
 	token, _ := sv.GenerateJWT(*user)
 	c.SetCookie("token", token, 3600, "/", "", true, false)
 
-	c.JSON(403, gin.H{
+	c.JSON(200, gin.H{
 		"success": true,
 	})
 }
@@ -215,6 +216,23 @@ func (sv server) getUserNotesHandler(c *gin.Context) {
 	c.JSON(200, gin.H{
 		"success": true,
 		"notes":   notes,
+	})
+}
+
+func (sv server) getUserHandler(c *gin.Context) {
+	user, err := sv.auth(c)
+	if err != nil {
+		c.JSON(403, gin.H{
+			"logged-in": false,
+			"error":   "unauthorized",
+		})
+		return
+	}
+
+	c.JSON(200, gin.H{
+		"logged-in": true,
+		"user": user.Id,
+		"username": user.Username,
 	})
 }
 

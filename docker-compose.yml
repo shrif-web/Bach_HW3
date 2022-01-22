@@ -10,6 +10,7 @@ services:
       - DB_PORT=5432
       - DB_PASSWORD=password
       - JWT_KEY=randomstring
+    restart: unless-stopped
 
   cache:
     build: ./cache
@@ -17,6 +18,8 @@ services:
       - db
     environment:
       - PORT=3124
+    restart: unless-stopped
+    
   db:
     image: postgres:alpine3.15
     environment:
@@ -24,6 +27,8 @@ services:
 
     ports:
       - "5432:5432"
+    restart: unless-stopped
+    
   nginx:
     image: nginx
     depends_on:
@@ -32,4 +37,6 @@ services:
       - ./nginx/conf.d:/etc/nginx/conf.d
       - ./front/banana-notes/build:/usr/share/nginx/html
     ports:
-      - "80:80"    
+      - "80:80"   
+    restart: unless-stopped
+     
