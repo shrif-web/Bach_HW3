@@ -7,6 +7,6 @@ npm run build
 Then just do 
 ```
 docker-compose build
-docker-compose up -d --scale server=3
+docker-compose up --scale server=3
 ```
 The `--scale server=3` runs 3 servers to achieve load balancing.
