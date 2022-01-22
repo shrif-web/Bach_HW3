@@ -1,5 +1,6 @@
 import { Card, Typography, message } from "antd";
 import { useState } from "react";
+import { useNavigate } from 'react-router-dom'
 
 import SignInForm from "../components/SignInForm";
 import SignUpForm from "../components/SignUpForm";
@@ -9,6 +10,7 @@ const { Title } = Typography;
 
 function EntryPage() {
   const [state, updateState] = useState("signin");
+  const navigate = useNavigate();
 
   const onSignInFinish = (values) => {
     console.log("Signing in ...:", values);
@@ -21,7 +23,7 @@ function EntryPage() {
     }).then((response) => {
       console.log(response);
       if (response.ok) {
-        //todo Route to Notes Page if successful else show error message
+        navigate('/notes')
       } else {
         message.error(response.statusText);
       }
@@ -55,7 +57,7 @@ function EntryPage() {
     }).then((response) => {
       console.log(response);
       if (response.ok) {
-        //todo Route to Notes Page if successful else show error message
+        navigate('/notes')
       } else {
         message.error(response.statusText);
       }
