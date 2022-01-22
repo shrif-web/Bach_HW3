@@ -40,6 +40,20 @@ func (cc *CacheClient) Put(key string, value string) (err error) {
 	return
 }
 
+func (cc *CacheClient) Remove(key string) (value string, err error) {
+	request := &rpc.GetRequest{
+		Key: key,
+	}
+
+	res, err := cc.CacheClient.Remove(context.Background(), request)
+	if err != nil {
+		return
+	}
+	value = res.Value
+
+	return
+}
+
 func NewCacheClient(addr string) *CacheClient {
 	opts := grpc.WithInsecure()
 	cc, err := grpc.Dial(addr, opts)

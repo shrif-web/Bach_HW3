@@ -1,5 +1,5 @@
 import { Card, Typography, message } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom'
 
 import SignInForm from "../components/SignInForm";
@@ -11,6 +11,19 @@ const { Title } = Typography;
 function EntryPage() {
   const [state, updateState] = useState("signin");
   const navigate = useNavigate();
+
+  async function isLoggedIn() {
+    const response = await fetch("/api/user", {
+      method: "GET",
+    });
+    return response.ok;
+  }
+
+  useEffect(async () => {
+    if (await isLoggedIn()) {
+      navigate("/notes")
+    }
+  }, [])
 
   const onSignInFinish = (values) => {
     console.log("Signing in ...:", values);

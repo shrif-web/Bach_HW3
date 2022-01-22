@@ -32,6 +32,12 @@ func (cs *CacheServer) Put(ctx context.Context, req *rpc.PutRequest) (res *rpc.R
 	return
 }
 
+func (cs *CacheServer) Remove(ctx context.Context, req *rpc.GetRequest) (res *rpc.Response, err error) {
+	res = &rpc.Response{}
+	res.Value, err = cs.cache.Remove(req.Key)
+	return
+}
+
 func (cs *CacheServer) Start(port string) {
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {

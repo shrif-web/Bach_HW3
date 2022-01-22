@@ -26,10 +26,10 @@ type formNote struct {
 	Content string `json:"content"`
 }
 
-func NewServer(jwt_key, db_host, db_port, db_password string) server {
+func NewServer(jwt_key, db_host, db_port, db_password, cache_addr string) server {
 	sv := server{
 		NewJWT(jwt_key),
-		NewDataHandler(db_host, db_port, db_password),
+		NewDataHandler(db_host, db_port, db_password, cache_addr),
 	}
 
 	return sv
@@ -41,6 +41,7 @@ func (sv server) Run(port string) {
 	r.POST("/auth", sv.authHandler)
 	r.POST("/reg", sv.addUserHandler)
 	r.POST("/add", sv.addNoteHandler)
+	r.POST("/delete", sv.deleteNoteHandler)
 	r.POST("/update", sv.updateNoteHandler)
 	r.GET("/notes/:id", sv.getNoteHandler)
 	r.GET("/notes", sv.getUserNotesHandler)
@@ -107,7 +108,44 @@ func (sv server) addNoteHandler(c *gin.Context) {
 	fn := &formNote{}
 	c.BindJSON(&fn)
 
-	sv.NoteAdd(user.Id, fn.Title, fn.Content)
+	newNote, _ := sv.NoteAdd(user.Id, fn.Title, fn.Content)
+	c.JSON(200, gin.H{
+		"success": true,
+		"newNote": newNote,
+	})
+}
+
+func (sv server) deleteNoteHandler(c *gin.Context) {
+	user, err := sv.auth(c)
+	if err != nil {
+		c.JSON(403, gin.H{
+			"success": false,
+			"error":   "unauthorized",
+		})
+		return
+	}
+
+	fn := &formNote{}
+	c.BindJSON(&fn)
+
+	note, err := sv.GetNote(fn.Id)
+	if err != nil {
+		c.JSON(404, gin.H{
+			"success": false,
+			"error":   "not found",
+		})
+		return
+	}
+
+	if !user.Admin && user.Id != note.Owner {
+		c.JSON(403, gin.H{
+			"success": false,
+			"error":   "unauthorized",
+		})
+		return
+	}
+
+	sv.NoteDelete(fn.Id)
 	c.JSON(200, gin.H{
 		"success": true,
 	})
@@ -135,7 +173,7 @@ func (sv server) updateNoteHandler(c *gin.Context) {
 	}
 
 	if !user.Admin && user.Id != note.Owner {
-		c.JSON(404, gin.H{
+		c.JSON(403, gin.H{
 			"success": false,
 			"error":   "unauthorized",
 		})
@@ -202,9 +240,13 @@ func (sv server) getUserNotesHandler(c *gin.Context) {
 		})
 		return
 	}
+	var notes []Note
+	if user.Admin {
+		notes, err = sv.GetAllNotes(user.Id)
+	} else {
+		notes, err = sv.GetUserNotes(user.Id)
+	}
 
-	notes, err := sv.GetUserNotes(user.Id)
-	fmt.Println(notes)
 	if err != nil {
 		c.JSON(404, gin.H{
 			"success": false,
@@ -224,15 +266,15 @@ func (sv server) getUserHandler(c *gin.Context) {
 	if err != nil {
 		c.JSON(403, gin.H{
 			"logged-in": false,
-			"error":   "unauthorized",
+			"error":     "unauthorized",
 		})
 		return
 	}
 
 	c.JSON(200, gin.H{
 		"logged-in": true,
-		"user": user.Id,
-		"username": user.Username,
+		"user":      user.Id,
+		"username":  user.Username,
 	})
 }
 

@@ -19,4 +19,5 @@ message putRequest {
 service Cache{
     rpc Get(getRequest) returns (response) {};
     rpc Put(putRequest) returns (response) {};
+    rpc Remove(getRequest) returns (response) {};
 }

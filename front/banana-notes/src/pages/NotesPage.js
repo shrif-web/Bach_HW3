@@ -1,17 +1,10 @@
-import { Button, Layout, Menu, message, Row } from "antd";
-import { MinusOutlined, PlusSquareOutlined } from "@ant-design/icons";
+import { Button, Layout, Menu, message, Row, Col } from "antd";
+import { MinusOutlined, PlusSquareOutlined, DeleteOutlined } from "@ant-design/icons";
 import { React, useEffect, useRef, useState } from "react";
 import Note from "../components/Note";
 import { useNavigate } from "react-router-dom";
 
 const { Header, Sider, Content, Footer } = Layout;
-
-async function isLoggedIn() {
-  const response = await fetch("/api/user", {
-    method: "GET",
-  });
-  return response.ok;
-}
 
 async function fetchNotes() {
   const response = await fetch("/api/notes", {
@@ -23,24 +16,77 @@ async function fetchNotes() {
 function NotesPage() {
   const navigate = useNavigate();
   const [loadedNotes, setLoadedNotes] = useState([]);
-  const currentNote = useRef(null);
+  const [thisNote, setThisNote] = useState({
+    Title: "",
+    Content: ""
+  });
 
-  const addHandler = (e) => {
-    console.log("Adding note ...:", currentNote);
-    fetch("/api/add", {
+  const menuClickHandler = async (e) => {
+    let cnote = loadedNotes.find(x => x.Id == e.key)
+    setThisNote({
+      Id: cnote.Id,
+      Title: cnote.Title,
+      Content: cnote.Content
+    })
+  }
+
+  const deleteHandler = async (Id, e) => {
+    console.log("Deleting note ...:", thisNote);
+    let response = await fetch("/api/delete", {
       method: "POST",
       body: JSON.stringify({
-        title: 'Fake Title',
-        content: 'Faker Content',
+        id: Id
       }),
-    }).then((response) => {
-      console.log(response);
-      if (response.ok) {
-        message.success("Note added");
-      } else {
-        message.error(response.statusText);
-      }
-    });
+    })
+    console.log(response);
+    if (response.ok) {
+      message.success("Note deleted");
+      let index = loadedNotes.findIndex(x => x.Id == Id)
+      setLoadedNotes([...loadedNotes.slice(0, index), ...loadedNotes.slice(index + 1)])
+    } else {
+      message.error(response.statusText);
+    }
+  };
+
+  const saveHandler = async (Id, Title, Content) => {
+    if (!Id) return
+    console.log("Updating note ...:", thisNote);
+    let newNote = {
+      Id: Id,
+      Title: Title,
+      Content: Content
+    }
+    let response = await fetch("/api/update", {
+      method: "POST",
+      body: JSON.stringify(newNote),
+    })
+    console.log(response);
+    if (response.ok) {
+      message.success("Note updated");
+      let index = loadedNotes.findIndex(x => x.Id == Id)
+      setLoadedNotes([...loadedNotes.slice(0, index), newNote, ...loadedNotes.slice(index + 1)])
+    } else {
+      message.error(response.statusText);
+    }
+  };
+
+  const addHandler = async (e) => {
+    console.log("Adding note ...:", thisNote);
+    let response = await fetch("/api/add", {
+      method: "POST",
+      body: JSON.stringify({
+        title: 'New Note',
+        content: '',
+      }),
+    })
+    console.log(response);
+    if (response.ok) {
+      message.success("Note added");
+      let res = await response.json()
+      setLoadedNotes([...loadedNotes, res.newNote])
+    } else {
+      message.error(response.statusText);
+    }
   };
 
   useEffect(async () => {
@@ -69,14 +115,18 @@ function NotesPage() {
           >
             Add <PlusSquareOutlined />
           </Button>
+          <div style={{marginLeft: "auto", marginRight: 20}}>
+            <a  href="/api/signout">Sign Out</a>
+          </div>
         </Row>
       </Header>
       <Layout hasSider className="site-layout">
         <Sider>
-          <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]}>
+          <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]} className="mscroll">
             {loadedNotes.map((note) => (
-              <Menu.Item key={note.Id} icon={<MinusOutlined />}>
+              <Menu.Item key={note.Id} icon={<MinusOutlined />} onClick={menuClickHandler} className="miscroll">
                 {note.Title}
+                <DeleteOutlined style={{marginTop: 12, float: 'right'}} onClick={deleteHandler.bind(null, note.Id)} />
               </Menu.Item>
             ))}
           </Menu>
@@ -90,9 +140,10 @@ function NotesPage() {
           }}
         >
           <Note
-            ref={currentNote}
-            title="NEW NOTE"
-            content="Enter your note here"
+            save={saveHandler}
+            id={thisNote.Id}
+            title={thisNote.Title}
+            content={thisNote.Content}
           />
         </Content>
       </Layout>

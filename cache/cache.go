@@ -27,7 +27,6 @@ func NewCache(capacity int) Cache {
 
 func (c *Cache) Get(key string) (value string, err error) {
 	element, ok := c.keyMap[key]
-	println(key, ok)
 	if !ok {
 		err = errors.New("miss cache")
 		return
@@ -39,9 +38,9 @@ func (c *Cache) Get(key string) (value string, err error) {
 
 func (c *Cache) Put(key string, value string) (err error) {
 	element, ok := c.keyMap[key]
-	println(key)
 	if ok {
 		c.queue.MoveToFront(element)
+		element.Value = value
 		return
 	}
 	if len(c.keyMap) >= c.capacity {
@@ -54,5 +53,16 @@ func (c *Cache) Put(key string, value string) (err error) {
 		value: value,
 	}
 	c.keyMap[key] = c.queue.PushFront(e)
+	return
+}
+
+func (c *Cache) Remove(key string) (val string, err error) {
+	val = ""
+	element, ok := c.keyMap[key]
+	if ok {
+		delete(c.keyMap, key)
+		c.queue.Remove(element)
+		return
+	}
 	return
 }
